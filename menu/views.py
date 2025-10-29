@@ -104,65 +104,91 @@ def buscar(request):
 
 @login_required(login_url='clientes:login_cliente')
 def adicionar_ao_carrinho(request, id):
+    """
+    Adiciona uma variante específica (DetalheProduto) ao carrinho.
+    O 'id' agora se refere ao DetalheProduto (variante com tamanho/cor/gênero específicos)
+    """
     usuario = get_object_or_404(CustomUser, username=request.user)
-
-    produto = get_object_or_404(Produto, id=id)
+    
+    # Buscar o detalhe do produto (variante específica)
+    detalhe_produto = get_object_or_404(DetalheProduto, id=id)
     carrinho_vinculado = get_object_or_404(Carrinho, cliente=usuario)
-    consulta = ItemCarrinho.objects.filter(produto=produto, carrinho=carrinho_vinculado)
+    
+    # Verificar se a variante já está no carrinho
+    consulta = ItemCarrinho.objects.filter(
+        detalhe_produto=detalhe_produto, 
+        carrinho=carrinho_vinculado
+    )
+    
     if consulta.exists():
         item = consulta.first()
-        item.quantidade += 1
-        item.save()
-
+        # Verificar se há estoque suficiente
+        if item.quantidade < detalhe_produto.estoque:
+            item.quantidade += 1
+            item.save()
+            message = f"{detalhe_produto.produto.nome} (quantidade atualizada)"
+        else:
+            return JsonResponse(
+                {
+                    "status": "error",
+                    "message": "Estoque insuficiente para este item"
+                },
+                status=400
+            )
     else:
+        # Verificar se há estoque disponível
+        if detalhe_produto.estoque < 1:
+            return JsonResponse(
+                {
+                    "status": "error",
+                    "message": "Produto sem estoque"
+                },
+                status=400
+            )
+        
         item = ItemCarrinho.objects.create(
-            produto=produto,
+            detalhe_produto=detalhe_produto,
             carrinho=carrinho_vinculado,
             quantidade=1,
         )
-
+        message = f"{detalhe_produto.produto.nome} adicionado ao carrinho"
+    
+    # Calcular totais
     item_carrinho = ItemCarrinho.objects.filter(carrinho=carrinho_vinculado)
     subtotal = calcula_valor_total_carrinho(item_carrinho)
-    qtd_itens_carrinho = ItemCarrinho.objects.filter(
-        carrinho=carrinho_vinculado
-    ).count()
-
-    # messages.info(request, f'{produto.nome} adicionado ao carrinho')
-    # return redirect(request.META.get('HTTP_REFERER', 'menu:index'))
-    print(
-        {
-            "status": "success",
-            "message": f"{produto.nome} adicionado ao carrinho",
-            "quantidade": item.quantidade,
-            "total": item.get_total(),
-            "produto_id": item.produto.id,
-            "total_price": subtotal,
-        }
-    )
+    qtd_itens_carrinho = item_carrinho.count()
 
     return JsonResponse(
         {
             "status": "success",
-            "message": f"{produto.nome} adicionado ao carrinho",
+            "message": message,
             "quantidade": item.quantidade,
-            "total": item.get_total(),
-            "produto_id": item.produto.id,
+            "total": float(item.get_total()),
+            "variante_id": detalhe_produto.id,
             'qtd_item_carrinho': qtd_itens_carrinho,
-            "total_price": subtotal,
-            "produto_nome": produto.nome,
+            "total_price": float(subtotal),
+            "produto_nome": detalhe_produto.produto.nome,
+            "variante_info": f"{detalhe_produto.cor.nome} - Tam {detalhe_produto.tamanho}",
         }
     )
 
 
 @login_required(login_url='clientes:login_cliente')
 def remover_do_carrinho(request, id):
+    """
+    Remove uma unidade de uma variante específica do carrinho.
+    O 'id' se refere ao DetalheProduto (variante).
+    """
     usuario = get_object_or_404(CustomUser, username=request.user)
-
-    produto = get_object_or_404(Produto, id=id)
+    
+    detalhe_produto = get_object_or_404(DetalheProduto, id=id)
     carrinho_vinculado = get_object_or_404(Carrinho, cliente=usuario)
+    
     consulta = ItemCarrinho.objects.filter(
-        produto=produto, carrinho=carrinho_vinculado
+        detalhe_produto=detalhe_produto, 
+        carrinho=carrinho_vinculado
     ).first()
+    
     if consulta:
         if consulta.quantidade > 1:
             consulta.quantidade -= 1
@@ -177,65 +203,57 @@ def remover_do_carrinho(request, id):
             status=400,
         )
 
-    # messages.warning(request, f'{produto.nome} removido do carrinho')
-    # return redirect(request.META.get('HTTP_REFERER', 'menu:index'))
     item_carrinho = ItemCarrinho.objects.filter(carrinho=carrinho_vinculado)
     subtotal = calcula_valor_total_carrinho(item_carrinho)
-    qtd_itens_carrinho = ItemCarrinho.objects.filter(
-        carrinho=carrinho_vinculado
-    ).count()
+    qtd_itens_carrinho = item_carrinho.count()
 
-    print(
-        {
-            "status": "success",
-            "message": f"{produto.nome} removido do carrinho",
-            "quantidade": quantidade_atual,
-            "total": consulta.get_total() if quantidade_atual > 0 else 0,
-            "produto_id": produto.id,
-            "total_price": subtotal,
-        }
-    )
     return JsonResponse(
         {
             "status": "success",
-            "message": f"{produto.nome} removido do carrinho",
+            "message": f"{detalhe_produto.produto.nome} removido do carrinho",
             "quantidade": quantidade_atual,
-            "total": consulta.get_total() if quantidade_atual > 0 else 0,
+            "total": float(consulta.get_total()) if quantidade_atual > 0 else 0,
             'qtd_item_carrinho': qtd_itens_carrinho,
-            "produto_id": produto.id,
-            "total_price": subtotal,
+            "variante_id": detalhe_produto.id,
+            "total_price": float(subtotal),
         }
     )
 
 
 @login_required(login_url='clientes:login_cliente')
 def excluir_do_carrinho(request, id):
+    """
+    Exclui completamente uma variante do carrinho.
+    O 'id' se refere ao DetalheProduto (variante).
+    """
     usuario = get_object_or_404(CustomUser, username=request.user)
-
-    produto = get_object_or_404(Produto, id=id)
+    
+    detalhe_produto = get_object_or_404(DetalheProduto, id=id)
     carrinho_vinculado = get_object_or_404(Carrinho, cliente=usuario)
+    
     consulta = ItemCarrinho.objects.filter(
-        produto=produto, carrinho=carrinho_vinculado
+        detalhe_produto=detalhe_produto, 
+        carrinho=carrinho_vinculado
     ).first()
-    if consulta.quantidade >= 1:
+    
+    if consulta:
         consulta.delete()
 
     qtd_itens_carrinho = ItemCarrinho.objects.filter(
         carrinho=carrinho_vinculado
     ).count()
-    # messages.error(request, f'{produto.nome} excluído do carrinho')
-    # return redirect(request.META.get('HTTP_REFERER', 'menu:index'))
+    
     item_carrinho = ItemCarrinho.objects.filter(carrinho=carrinho_vinculado)
     subtotal = calcula_valor_total_carrinho(item_carrinho)
 
     return JsonResponse(
         {
             "status": "success",
-            "message": f"{produto.nome} excluído do carrinho",
+            "message": f"{detalhe_produto.produto.nome} excluído do carrinho",
             "quantidade": 0,
             'qtd_item_carrinho': qtd_itens_carrinho,
-            "produto_id": produto.id,
-            "total_price": subtotal,
+            "variante_id": detalhe_produto.id,
+            "total_price": float(subtotal),
         }
     )
 
@@ -253,10 +271,10 @@ def produto_detalhado(request, id):
     # Buscar todos os detalhes do produto (variações)
     detalhes = produto.detalhes.all().select_related('cor')
     
-    # Agrupar tamanhos, cores e gêneros disponíveis
-    tamanhos_disponiveis = detalhes.values_list('tamanho', flat=True).distinct().order_by('tamanho')
-    cores_disponiveis = detalhes.values_list('cor__nome', 'cor__id').distinct()
-    generos_disponiveis = detalhes.values_list('genero', flat=True).distinct()
+    # Agrupar tamanhos, cores e gêneros disponíveis (sem duplicatas)
+    tamanhos_disponiveis = sorted(set(detalhes.values_list('tamanho', flat=True)))
+    cores_disponiveis = list(detalhes.values_list('cor__nome', 'cor__id').distinct())
+    generos_disponiveis = sorted(set(detalhes.values_list('genero', flat=True)))
     
     # Calcular estoque total e preço (usar o menor preço)
     estoque_total = sum(d.estoque for d in detalhes)
