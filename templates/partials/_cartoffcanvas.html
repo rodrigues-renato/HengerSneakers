@@ -1,0 +1,11 @@
+<div class="offcanvas offcanvas-end" tabindex="-1" id="carrinhoOffcanvas" aria-labelledby="carrinhoOffcanvasLabel" style="width: 420px;">
+  <div class="offcanvas-header" style="background: var(--light-gray); border-bottom: 2px solid var(--medium-gray);">
+      <h5 class="offcanvas-title fw-bold" id="carrinhoOffcanvasLabel" style="color: var(--secondary-black);">
+          <i class="fas fa-shopping-bag me-2" style="color: var(--primary-red);"></i>Meu Carrinho
+      </h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body" style="padding: 20px;">
+      {% include "menu/carrinho.html" %}
+  </div>
+</div>

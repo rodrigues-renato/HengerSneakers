@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Atualizar Dados{% endblock title %}
+{% block content %}
+<div class="d-flex justify-content-center">
+    <h2 class="display-6">Atualizar Dados</h2>
+</div>
+<div class = "form-container">
+    <form method="post" class="update-form">
+        {% csrf_token %}
+        <div class="form-group">
+            {{ user_form.non_field_errors }}
+                <label for="{{ user_form.telefone.id_for_label }}">
+                    <i class="fas fa-phone"></i> {{ user_form.telefone.label }}
+                </label>
+            {{ user_form.telefone }}
+            {{ user_form.telefone.errors }}
+            
+    
+        <label class="form-label"><i class="fas fa-address-card"></i> Endereços</label>
+        <div class="d-flex align-items-center">
+            <select id="endereco_select" name="endereco_select" class="form-select form-select-lg">
+                <option value="" disabled selected>Selecione um endereço</option>
+                {% for endereco in enderecos %}
+                    <option data-id="{{ endereco.id }}"
+                        data-rua="{{ endereco.rua }}"
+                        data-numero="{{ endereco.numero }}"
+                        data-bairro="{{ endereco.bairro }}">
+                        {{ endereco.rua }}, {{ endereco.numero }} - {{ endereco.bairro }}
+                    </option>
+                {% endfor %}
+            </select> 
+        
+            <button type="button" class="btn btn-primary ms-2" id="editar_endereco_btn"
+                    data-bs-toggle="modal" data-bs-target="#editar_endereco" disabled>
+                <i class="fa fa-edit"></i>
+            </button>
+            <button type="button" class="btn btn-success ms-2" data-bs-toggle="modal" data-bs-target="#adicionar_endereco">
+                <b><i class="fas fa-plus"></i></b>
+            </button>
+        </div> 
+
+    <!-- Formulário para alterar senha -->
+    <div class="mt-3">
+        <label for="{{ user_form.old_password.id_for_label }}">
+            <i class="fas fa-lock"></i> {{ user_form.old_password.label }}
+        </label>
+        {{user_form.old_password}}
+        {{user_form.old_password.errors}}
+        
+
+        <label for="{{ user_form.new_password1.id_for_label }}">
+            <i class="fas fa-lock"></i> {{ user_form.new_password1.label }}
+        </label>
+        {{user_form.new_password1}}
+        {{user_form.new_password1.errors}}
+
+        <label for="{{ user_form.new_password2.id_for_label }}">
+            <i class="fas fa-lock"></i> {{ user_form.new_password2.label }}
+        </label>
+        {{user_form.new_password2}}
+        {{user_form.new_password2.errors}}
+            
+    </div>
+    
+        <button type="submit"  class="btn btn-success btn-lg w-100 mt-4">Confirmar Alterações</button>
+    </form>
+</div>
+</div>
+<div class="modal fade" id="editar_endereco" tabindex="-1" aria-labelledby="editar_endereco_modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="att-form-endereco" method="post">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="editar_endereco_modal">Editar endereço</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                <div class="form-group">
+                <div class="mb-3">
+                        <label class="form-label">Rua</label>
+                        <input type="text" id="rua_input" name="rua" class="form-control form-control-lg">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Número</label>
+                        <input type="text" id="numero_input" name="numero" class="form-control form-control-lg">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Bairro</label>
+                        <input type="text" id="bairro_input" name="bairro" class="form-control form-control-lg">
+                    </div>
+                    <input type="hidden" id="endereco_id" name="endereco_id">
+                </div> 
+            </div>
+                <div class="modal-footer">
+                    <a href="#" id="btn-excluir-endereco" class="btn btn-danger me-auto">Excluir</a>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="submit" class="btn btn-success">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Add endereço-->
+<div class="modal fade" id="adicionar_endereco" tabindex="-1" aria-labelledby="add_endereco_modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="form-endereco">
+                {% csrf_token %}
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="add_endereco_modal">Adicionar endereço</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {% include "endereco_form.html" %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="submit" class="btn btn-success" id="att-btn-add-address" data-url="{% url 'clientes:salvar_endereco' %}">
+                    Salvar
+                </button>
+            </div>
+            </form>
+        </div>
+        </div>
+    </div>
+</div>     
+
+
+<script>
+    document.getElementById('editar_endereco_btn').addEventListener('click', function () {
+        let select = document.getElementById('endereco_select');
+        let selectedOption = select.options[select.selectedIndex];
+        
+        if (selectedOption.value) {
+            document.getElementById('endereco_id').value = selectedOption.getAttribute('data-id');
+            document.getElementById('rua_input').value = selectedOption.getAttribute('data-rua');
+            document.getElementById('numero_input').value = selectedOption.getAttribute('data-numero');
+            document.getElementById('bairro_input').value = selectedOption.getAttribute('data-bairro');
+        }
+    });
+    
+    document.getElementById('endereco_select').addEventListener('change', function () {
+        let botao = document.getElementById('editar_endereco_btn');
+        botao.disabled = this.value === "";
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const selectEndereco = document.getElementById("endereco_select");
+        const btnEditar = document.getElementById("editar_endereco_btn");
+        const btnExcluir = document.getElementById("btn-excluir-endereco");
+    
+        selectEndereco.addEventListener("change", function () {
+            const selectedOption = selectEndereco.options[selectEndereco.selectedIndex];
+            const enderecoId = selectedOption.getAttribute("data-id");
+    
+            if (enderecoId) {
+                btnEditar.removeAttribute("disabled");
+                btnExcluir.href = `/cliente/excluir_endereco/${enderecoId}/`;  // URL dinâmica
+            } else {
+                btnEditar.setAttribute("disabled", "true");
+                btnExcluir.href = "#";  // Reseta o link
+            }
+        });
+    });
+    
+</script>
+    {% endblock %}

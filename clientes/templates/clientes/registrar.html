@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+Criar Conta - Henger Sneakers
+{% endblock title %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center align-items-center" style="min-height: 90vh; padding: 40px 0;">
+        <div class="col-md-6 col-lg-5">
+            <div class="login-container" style="position: relative; transform: none; top: auto; left: auto; background: white; padding: 40px; border-radius: 12px; box-shadow: var(--shadow-xl);">
+                <div class="text-center mb-4">
+                    <i class="fas fa-shoe-prints" style="font-size: 48px; color: var(--primary-red);"></i>
+                    <h2 class="mt-3 mb-1" style="font-weight: 700; color: var(--secondary-black);">Criar Conta</h2>
+                    <p class="text-muted">Junte-se à família Henger</p>
+                </div>
+                
+                <form method="POST" class="login-form">
+                    {% csrf_token %}
+                    
+                    {% if user_form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ user_form.non_field_errors }}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="{{ user_form.first_name.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="fas fa-user me-2"></i>{{ user_form.first_name.label }}
+                                </label>
+                                {{ user_form.first_name }}
+                                {% if user_form.first_name.errors %}
+                                    <div class="text-danger small mt-1">{{ user_form.first_name.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="{{ user_form.last_name.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="fas fa-user me-2"></i>{{ user_form.last_name.label }}
+                                </label>
+                                {{ user_form.last_name }}
+                                {% if user_form.last_name.errors %}
+                                    <div class="text-danger small mt-1">{{ user_form.last_name.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        <label for="{{ user_form.email.id_for_label }}" class="form-label fw-semibold">
+                            <i class="fas fa-envelope me-2"></i>{{ user_form.email.label }}
+                        </label>
+                        {{ user_form.email }}
+                        {% if user_form.email.errors %}
+                            <div class="text-danger small mt-1">{{ user_form.email.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="{{ user_form.cpf.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="fas fa-id-card me-2"></i>{{ user_form.cpf.label }}
+                                </label>
+                                {{ user_form.cpf }}
+                                {% if user_form.cpf.errors %}
+                                    <div class="text-danger small mt-1">{{ user_form.cpf.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="{{ user_form.telefone.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="fas fa-phone me-2"></i>{{ user_form.telefone.label }}
+                                </label>
+                                {{ user_form.telefone }}
+                                {% if user_form.telefone.errors %}
+                                    <div class="text-danger small mt-1">{{ user_form.telefone.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        <label for="{{ user_form.password1.id_for_label }}" class="form-label fw-semibold">
+                            <i class="fas fa-lock me-2"></i>{{ user_form.password1.label }}
+                        </label>
+                        {{ user_form.password1 }}
+                        {% if user_form.password1.errors %}
+                            <div class="text-danger small mt-1">{{ user_form.password1.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group mb-4">
+                        <label for="{{ user_form.password2.id_for_label }}" class="form-label fw-semibold">
+                            <i class="fas fa-lock me-2"></i>{{ user_form.password2.label }}
+                        </label>
+                        {{ user_form.password2 }}
+                        {% if user_form.password2.errors %}
+                            <div class="text-danger small mt-1">{{ user_form.password2.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <button type="submit" class="submit-btn mb-3">
+                        <i class="fas fa-user-plus me-2"></i>Cadastrar
+                    </button>
+                    
+                    <div class="text-center">
+                        <p class="text-muted mb-2">Já tem uma conta?</p>
+                        <a href="{% url 'clientes:login_cliente' %}" class="text-decoration-none fw-semibold" style="color: var(--primary-red);">
+                            <i class="fas fa-sign-in-alt me-1"></i>Fazer login
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

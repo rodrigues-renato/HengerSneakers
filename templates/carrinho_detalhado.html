@@ -1,0 +1,28 @@
+<div id="item-carrinho" class="cart-items">
+    {% csrf_token %}
+    {% for item in item_carrinho %}
+        <div id="menu-item-{{ item.produto.id }}-carrinho" class="cart-item">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="flex-grow-1">
+                    <div class="fw-bold mb-1" style="color: var(--secondary-black);">{{ item.produto.marca }} {{ item.produto.nome }}</div>
+                    <div class="text-muted small mb-2">Tam. {{ item.produto.tamanho }} {% if item.produto.cor %}- {{ item.produto.cor }}{% endif %}</div>
+                </div>
+                <a href="{% url 'menu:excluir_do_carrinho' item.produto.id %}" class="btn btn-outline-danger btn-sm btn-ajax">
+                    <i class="fas fa-trash"></i> 
+                </a>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="quantity-controls">
+                    <a href="{% url 'menu:remover_do_carrinho' item.produto.id %}" class="btn btn-danger btn-sm quantity-btn btn-ajax">
+                        <i class="fas fa-minus"></i>
+                    </a>
+                    <span id="quantidade-{{ item.produto.id }}-carrinho" class="quantity-value">{{ item.quantidade }}</span>
+                    <a href="{% url 'menu:adicionar_ao_carrinho' item.produto.id %}" class="btn btn-success btn-sm quantity-btn btn-ajax">
+                        <i class="fas fa-plus"></i>
+                    </a>
+                </div>
+                <span id="total-{{ item.produto.id }}-carrinho" class="fw-bold" style="font-size: 18px; color: var(--secondary-black);">R$ {{ item.get_total|floatformat:2 }}</span>
+            </div>
+        </div>
+    {% endfor %}
+</div>

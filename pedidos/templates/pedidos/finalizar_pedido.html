@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% load static %}
+    {% block title %}Finalizar pedido{% endblock title %}
+
+{% block content %}
+<div id="finalizar-pedido-total">
+    
+    <h2 class="display-6">Meu Pedido</h2>
+    
+    <div id="item-carrinho-pedido" class="card mb-4 shadow-sm">
+        <div class="card-body">
+        {% for item in item_carrinho %}
+        <div id="menu-item-{{ item.produto.id }}-pedido" class="d-flex justify-content-between align-items-center py-2 border-bottom">
+            <div class="d-flex align-items-center">
+                    <span id="quantidade-{{ item.produto.id }}-pedido" class="badge bg-secondary me-3">{{ item.quantidade }}</span>
+                    <span class="fs-5">{{ item.produto.nome }}</span>
+                </div>
+                <span id="total-{{ item.produto.id }}-pedido" class="fs-5 fw-bold">R$ {{ item.get_total|floatformat:2 }}</span>
+            </div>
+        
+        {% endfor %}
+    <div class="mt-3 text-end">
+        <span id="valor-total-pedido" class="fs-4 fw-bold text-success">Total: R$ {{ subtotal|floatformat:2|default:"0.00" }}</span>
+    </div>
+</div>
+</div>
+
+    <div class="mt-3">
+        <form method="post" class="p-4 border rounded bg-light">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="metodo_pagamento" class="form-label">Método de Pagamento</label>
+                <select name="metodo_pagamento" id="metodo_pagamento" class="form-select form-select-lg mb-3">
+                    <option value="" disabled selected>Selecione um método</option>
+                    <option value="debito">Débito</option>
+                    <option value="credito">Crédito</option>
+                    <option value="pix">Pix</option>
+                    <option value="dinheiro">Dinheiro</option>
+                </select>
+            </div>
+
+            <div id="cartao" class="mb-3" style="display: none;">
+                <label for="cartao" class="form-label">Número do cartão</label>
+                <input type="text" max=20 name="cartao" class="form-control form-control-lg">
+                <label for="cvv" class="form-label mt-2">CVV</label>
+                <input type="text" max=3 name="cvv" class="form-control form-control-lg">
+            </div>
+
+            <div id="dinheiro" class="mb-3" style="display: none;">
+                <label for="dinheiro" class="form-label">Troco para:</label>
+                <input type="number" name="dinheiro" class="form-control form-control-lg">
+            </div>
+
+            <div class="mb-3">
+                <input type="radio" name="retirada_ou_entrega" value="entrega" id="entrega" class="form-check-input">
+                <label for="entrega" class="form-check-label">Entrega (40 min)</label>
+                <input type="radio" name="retirada_ou_entrega" value="retirada" id="retirada" class="form-check-input ms-3">
+                <label for="retirada" class="form-check-label">Retirada (20 min)</label>
+            </div>
+
+            <div id="form-endereco" class="mb-3" style="display: none;">
+                <label for="endereco" class="form-label">Escolha o endereço</label>
+                <div class="d-flex align-items-center">
+                    <select name="endereco" id="endereco" class="form-select form-select-lg">
+                        {% for endereco in enderecos %}
+                            <option value="{{ endereco.rua }}, {{ endereco.numero }}, {{ endereco.bairro }}">
+                                {{ endereco.rua }}, {{ endereco.numero }}, {{ endereco.bairro }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <button type="button" class="btn btn-primary ms-2" data-bs-toggle="modal" data-bs-target="#adicionar_endereco">
+                        <b><i class="fas fa-plus"></i></b>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-success btn-lg w-100 mt-4">FINALIZAR PEDIDO</button>
+        </div>
+        </form>
+
+        <!-- Modal -->
+        <div class="modal fade" id="adicionar_endereco" tabindex="-1" aria-labelledby="add_endereco_modal" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form id="form-endereco">
+                        {% csrf_token %}
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="add_endereco_modal">Adicionar endereço</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        {% include "endereco_form.html" %}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                        <button type="submit" class="btn btn-success" id="btn-add-address" data-url="{% url 'clientes:salvar_endereco' %}">
+                            Salvar
+                        </button>
+                    </div>
+                    </form>
+                </div>
+                </div>
+            </div>
+    </div>     
+
+    {% include "partials/_cartoffcanvas.html" %}
+
+{% endblock content %}

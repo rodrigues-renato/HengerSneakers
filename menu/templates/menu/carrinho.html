@@ -1,0 +1,23 @@
+{% load static %}
+    {% block content %}
+
+    {% if item_carrinho %}
+        {% include "carrinho_detalhado.html" %}
+        <div id="finalizar-pedido" class="mt-4 p-4 rounded" style="background: var(--light-gray); border: 2px solid var(--medium-gray);">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="text-muted">Subtotal</span>
+                <span id="valor-total" class="fs-3 fw-bold" style="color: var(--secondary-black);">R$ {{ subtotal|floatformat:2|default:"0.00" }}</span>
+            </div>
+            <a href="{% url 'pedidos:finalizar_pedido'  %}" class="btn btn-checkout w-100 d-flex align-items-center justify-content-center gap-2">
+                <i class="fas fa-check-circle"></i>
+                Finalizar Pedido
+            </a>
+        </div>    
+    {% else %}
+        <div class="empty-state" style="padding: 40px 20px;">
+            <i class="fas fa-shopping-bag" style="font-size: 48px; color: var(--medium-gray); margin-bottom: 16px;"></i>
+            <h5 style="color: var(--dark-gray); font-weight: 600;">Seu carrinho está vazio</h5>
+            <p class="text-muted small">Adicione produtos incríveis para começar!</p>
+        </div>    
+    {% endif %}
+{% endblock content %}

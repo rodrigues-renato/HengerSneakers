@@ -1,0 +1,45 @@
+<header>
+  <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+    <div class="container">
+      <a class="navbar-brand" href="{% url 'menu:index' %}">
+        <i class="fas fa-shoe-prints me-2"></i>HENGER
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav ms-auto">
+          <a class="nav-link active" aria-current="page" href="{% url 'menu:index' %}">
+            <i class="fas fa-home me-1"></i>Sneakers
+          </a>
+          <div class="nav-item dropdown">
+            <a class="nav-link active dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-user-circle me-1"></i>{{ user.first_name|default:"Conta" }}
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="userDropdown" style="font-size: 1em;">
+              {% if user.is_authenticated %}
+                <li><a class="dropdown-item" href="{% url "clientes:atualizar_dados" %}"><i class="fas fa-user-edit me-2"></i>Meus Dados</a></li>
+                <li><a class="dropdown-item" href="{% url 'pedidos:historico_de_pedidos' %}"><i class="fas fa-history me-2"></i>Meus Pedidos</a></li>
+                {% if user.is_staff %}
+                  <li><a class="dropdown-item" href="{% url 'dashboard:graph' %}"><i class="fas fa-chart-line me-2"></i>Dashboard</a></li>
+                {% endif %}
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-danger" href="{% url 'clientes:logout_cliente' %}"><i class="fas fa-sign-out-alt me-2"></i>Sair</a></li>
+
+              {% else %}
+                <li><a class="dropdown-item" href="{% url 'clientes:registrar_cliente' %}"><i class="fas fa-user-plus me-2"></i>Criar Conta</a></li>
+                <li><a class="dropdown-item" href="{% url 'clientes:login_cliente' %}"><i class="fas fa-sign-in-alt me-2"></i>Login</a></li>
+              {% endif %}
+            </ul>
+          </div>
+          {% if request.resolver_match.view_name == "menu:index" or qtd_item_carrinho %}
+            <button class="nav-link active border-0 bg-transparent" data-bs-toggle="offcanvas" data-bs-target="#carrinhoOffcanvas" aria-controls="carrinhoOffcanvas">
+              <i class="fas fa-shopping-bag me-1"></i>Carrinho
+              <span id="qtd-item-carrinho" class="badge cart-badge rounded-pill ms-1">{{ qtd_item_carrinho }}</span>
+            </button>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>

@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load static %}
+    {% block title %}Henger Sneakers{% endblock title %}
+
+    {% block content %}
+    
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <h1 class="hero-title">HENGER SNEAKERS</h1>
+        <p class="hero-subtitle">Descubra os tênis mais exclusivos e confortáveis para seu estilo</p>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-container">
+        <form action="{% url 'menu:buscar' %}" method="GET">
+            <div class="search-wrapper">
+                <input type="search" name="q" class="search-input" placeholder="Buscar tênis..." value="{{request.GET.q}}">
+                <button class="search-btn" type="submit">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    {% if page_obj %}
+        <!-- Product Grid -->
+        <div class="product-grid">
+            {% for produto in page_obj %}
+                <div class="product-card">
+                    <a href="{% url 'menu:produto_detalhado' produto.id %}" style="text-decoration: none; color: inherit;">
+                        <div class="product-image-container">
+                            {% if produto.imagem %}
+                                <img src="{{ produto.imagem.url }}" alt="{{ produto.nome }}" class="product-image">
+                            {% else %}
+                                <div class="product-image" style="display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #f5f5f5 0%, #e5e5e5 100%);">
+                                    <i class="fas fa-shoe-prints" style="font-size: 64px; color: var(--dark-gray); opacity: 0.3;"></i>
+                                </div>
+                            {% endif %}
+                            {% if produto.estoque_total < 10 and produto.estoque_total > 0 %}
+                                <span class="product-badge">Últimas Unidades</span>
+                            {% elif produto.estoque_total == 0 or not produto.estoque_total %}
+                                <span class="product-badge" style="background: var(--dark-gray);">Esgotado</span>
+                            {% endif %}
+                        </div>
+                        <div class="product-info">
+                            <div class="product-brand">{{ produto.marca }}</div>
+                            <h3 class="product-name">{{ produto.nome }}</h3>
+                            <p class="product-description">{{ produto.descricao|truncatewords:15 }}</p>
+                            <div class="product-details">
+                                <span class="product-detail-item">
+                                    <i class="fas fa-th"></i> {{ produto.qtd_variantes }} variações
+                                </span>
+                                {% if produto.estoque_total %}
+                                <span class="product-detail-item">
+                                    <i class="fas fa-box"></i> {{ produto.estoque_total }} disponíveis
+                                </span>
+                                {% endif %}
+                            </div>
+                            <div class="product-footer">
+                                <span class="product-price">A partir de R$ {{ produto.preco_minimo|floatformat:2 }}</span>
+                                {% csrf_token %}
+                                {% if produto.estoque_total > 0 %}
+                                    <a href="{% url 'menu:produto_detalhado' produto.id %}" class="btn btn-add-cart" onclick="event.stopPropagation();">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                {% else %}
+                                    <button class="btn btn-add-cart" disabled style="background: var(--dark-gray); cursor: not-allowed;">
+                                        <i class="fas fa-times"></i>
+                                        Esgotado
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-search"></i>
+            <h3>Nenhum produto encontrado</h3>
+            <p>Tente buscar com outros termos</p>
+        </div>
+    {% endif %}
+
+    <!-- Offcanvas for Carrinho -->
+    {% include "partials/_cartoffcanvas.html" %}
+
+{% endblock content %}

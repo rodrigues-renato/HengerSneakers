@@ -1,0 +1,14 @@
+<div class="form-group">
+  <label for="{{ address_form.rua.id_for_label}}" class="form-label">Rua</label>
+  {{ address_form.rua }} {{ address_form.rua.errors }}
+
+  <label for="{{ address_form.numero.id_for_label}}" class="form-label"
+    >Número</label
+  >
+  {{ address_form.numero }} {{ address_form.numero.errors }}
+
+  <label for="{{ address_form.bairro.id_for_label}}" class="form-label"
+    >Bairro</label
+  >
+  {{ address_form.bairro }} {{ address_form.bairro.errors }}
+</div>
